@@ -1,5 +1,6 @@
 import re
 import csv
+from datetime import datetime
 
 PHONE_PATTERN = r'(\+7|8)*[\s\(]*(\d{3})[\)\s-]*(\d{3})[-]*(\d{2})[-]*(\d{2})[\s\(]*(доб\.)*[\s]*(\d+)*[\)]*'
 PHONE_SUB = r'+7(\2)-\3-\4-\5 \6\7'
@@ -7,6 +8,20 @@ PHONE_SUB = r'+7(\2)-\3-\4-\5 \6\7'
 with open("phonebook_raw.csv", encoding="utf-8") as f:
     rows = csv.reader(f, delimiter=",")
     contacts_list = list(rows)
+
+def get_log(func):
+    def foo(*args, **kwargs):
+        date_time = datetime.now()
+        func_name = func.__name__
+        result = func(*args, **kwargs)
+        with open('decoratorlogs.txt', 'w', encoding='utf-8') as file:
+            file.write(f'Дата/время: {date_time}\n'
+                       f'Имя функции: {func_name}\n'
+                       f'Аргументы: {args, kwargs}\n'
+                       f'Результат: {result}\n')
+        return result
+    return foo
+
 
 def main(contact_list: list):
     new_list = list()
@@ -18,7 +33,7 @@ def main(contact_list: list):
         new_list.append(result)
     return union(new_list)
 
-
+@get_log
 def union(contacts: list):
     for contact in contacts:
         first_name = contact[0]
